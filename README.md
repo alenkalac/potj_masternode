@@ -1,0 +1,1 @@
+# potj_masternode
