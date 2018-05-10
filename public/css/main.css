@@ -66,3 +66,23 @@
 #metamask-overlay img {
     width: 45px;
 }
+
+.calculator input {
+    background-color: transparent; 
+    border: none;
+    color: black(255, 0, 13) !important;
+    border-bottom: 1px solid rgb(100, 100, 192);
+}
+
+.calculator input:focus {
+    outline: none;
+    border-bottom: 1px solid rgb(37, 37, 182);
+}
+
+.calculator input::-webkit-outer-spin-button,
+.calculator input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
