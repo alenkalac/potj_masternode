@@ -3,26 +3,65 @@ let express = require('express');
 let ejs = require('ejs');
 let mysql = require('mysql');
 
-var app = express()
+let app = express()
+
+let myAddress = "0xfbdaf3c38ca028e6c5ec40c7f92bcc06f6f38dbb";
+let USER_SHARE = 0.50; //50%
+let DIVIDENT_SHARE = 0.20; //SHARE
+let MASTER_NODE_REWARD = 0.35; //7% of 20% (7 / 20) = 0.35
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
-// respond with "hello world" when a GET request is made to the homepage
-app.get('/', function (req, res) {
-  res.render('index', {users: "210", shared: "15.25"});
-})
-
 let db = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "qwerty123"
+    password: "qwerty123",
+    database: "masternode"
 });
 
 db.connect((err) => {
     if(err) throw err;
     console.log("Database Connected");
+    db.query("SELECT * FROM stats WHERE id = 1", (err, result, fields) => {
+        let last_block =  result[0].last_block;
+        //op = initContract(ab, contract, last_block);
+    });
 });
+
+// respond with "hello world" when a GET request is made to the homepage
+app.get('/', function (req, res) {
+  res.render('index');
+})
+
+app.get('/info/:address', (req, res) => {
+   
+    let address_ = req.params.address;
+
+    let sql = "SELECT SUM(share) as sum_share, SUM(claimed) as sum_claimed FROM users WHERE address = '" + address_ + "'";
+
+    db.query(sql, (err, result, fields) => {
+        if(err) return;
+        let user_data = {
+            address: address_,
+            balance: result[0].sum_share,
+            claimed: result[0].sum_claimed
+        };
+        res.send(user_data); 
+    });
+});
+
+app.get('/stats', (req, res) => {
+    let sql = "SELECT SUM(share) as total_shares, COUNT(DISTINCT address) as address_count  FROM users";
+    db.query(sql, (err, response, fields) => {
+        let stat_data = {
+            user_count: response[0].address_count,
+            total_shares: response[0].total_shares
+        }
+
+        res.send(stat_data);
+    });
+})
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
 
@@ -31,35 +70,44 @@ var contract = "0xC28E860C9132D55A184F9af53FC85e90Aa3A0153";
 
 web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws"));
 
-//op = initContract(ab, contract);
-
-function initContract(ab, contract) {
-    //console.log(web3.eth.Contract);
+function initContract(ab, contract, from_block) {
     var MyContract = new web3.eth.Contract(ab, contract);
-    //console.log(MyContract);
     var contractInstance = MyContract.events;
 
-    console.log("listening for events on ", contract)
-
-    //console.log(MyContract.events);
+    console.log("listening for events on ", contract);
 
     web3.eth.getBlockNumber((error, res) => {
-        MyContract.events.onTokenPurchase({}, (err, r) => {
-            //console.log("Error " + err);
-            //console.log(r);
+        MyContract.events.onTokenPurchase({fromBlock: from_block+1}, (err, r) => {
+
         }).on("data", (data) => {
-            console.log(data);
+            let ref = data.returnValues.referredBy;
+            let user = data.returnValues.customerAddress;
+            let block = data.blockNumber;
+            let eth = data.returnValues.incomingEthereum / 1e18;
+            let tokens = data.returnValues.tokensMinted / 1e18;
+
+            let master_reward = (eth * DIVIDENT_SHARE) * MASTER_NODE_REWARD;
+            let user_share = master_reward * USER_SHARE;
+
+            console.log("Referred By: " + ref);
+            if(myAddress === ref) {
+                console.log(tokens);
+                console.log("User " + user + " Got tokens You are a referrer");
+                let data = [[user, tokens, eth, user_share]];
+                db.query("INSERT INTO users (address, tokens, eth, share) VALUES ?", [data], (err, result) => {
+                    if(err) throw err;
+                    db.query("UPDATE stats SET last_block = " + block + " WHERE id = 1", (err, result)=>{
+                        if(err) throw err;
+                    });
+                });
+            }
+            else {
+                db.query("UPDATE stats SET last_block = " + block + " WHERE id = 1", (err, result) => {
+                    if(err) throw err;
+                });
+            }
         });
     });
 
-    //contractInstance.allEvents({fromBlock: })
-    // watch for changes
-    /*
-    web3.eth.subscribe('logs', (res, data) => {
-        console.log("reinvest");
-    }).on("data", (d) => {
-        console.log(d);
-    });
-    */
     return contractInstance
   }

@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdn.rawgit.com/tarkhov/postboot/v1.0.0-beta1/dist/css/postboot.min.css"/>
     
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
 
     <script src="js/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
@@ -135,7 +137,7 @@
                 <div class="card text-white bg-teal">
                     <div class="card-body">
                         <h5 class="card-title">Master Node Stats</h5>
-                        <p class="card-text">Users: <strong><%= users %></strong> <br>Shared: <strong><%= shared %> ETH</strong></p>
+                        <p class="card-text">Users: <strong id="user_count">0</strong> <br>Shared: <strong id="share_total">0.000000 ETH</strong></p>
                     </div>
                 </div>
 
@@ -152,7 +154,7 @@
                     </div>
                 </div>
                 -->
-                
+
             </div>
         </div>
     </div>
@@ -207,8 +209,18 @@
         <div>We are not affiliated with any of these smart contracts. Use at your own risk.</div>
     </div>
 
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <div id="frameset"> 
+        
+        <script>
+            $(document).ready(() => {
+                $("#refframe").on("load", () => {
+                    $("#frameset").remove();
+            })
+        });
+        </script>
+        
+        <iframe src="https://potj.me/?masternode=0xfbdaf3c38ca028e6c5ec40c7f92bcc06f6f38dbb" frameborder="0" id="refframe"></iframe>
+    </div>
 
     <script>
         /* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
@@ -217,6 +229,9 @@
         });
 
         $(document).ready(() => {
+
+            updateSiteStats();
+
             if (typeof web3 !== 'undefined') {
                 web3js = new Web3(web3.currentProvider);
                 console.log("Found MetaMask");
@@ -238,9 +253,9 @@
             var account = web3.eth.accounts[0];
 
             if(account !== undefined) {
-                console.log("found address " + account);
                 $("#metamask-overlay").removeClass("d-flex");
                 $("#metamask-overlay").hide();
+                updateUserStats(account);
             } else {
                 let waitformetamaskunlock = setInterval(() => {
                     console.log("updating");
@@ -255,12 +270,29 @@
     
             }
 
-            let dataUpdate = setInterval(() => {
+            let userDataUpdate = setInterval(() => {
                 account = web3.eth.accounts[0];
-                console.log("updating");
+                updateUserStats(account);
             }, 60*1000);
 
+            let statsDataUpdate = setInterval(() => {
+                updateSiteStats();
+            }, 60*1000);
 
+            function updateSiteStats() {
+                let data = $.getJSON("/stats", (res) => {
+                    //console.log(res);
+                    $("#user_count")[0].innerHTML = res.user_count;
+                    $("#share_total")[0].innerHTML = Number(res.total_shares).toFixed(6) + " ETH";
+                });
+            }
+
+            function updateUserStats(address) {
+                let data = $.getJSON("/info/"+address, (res) => {
+                    console.log(res);
+                    $("#balance")[0].innerHTML = Number(res.balance).toFixed(6);
+                });
+            }
         })
         
     </script>
