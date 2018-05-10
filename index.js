@@ -5,8 +5,6 @@ let mysql = require('mysql');
 
 let config = require("./config");
 
-console.log(config);
-
 let app = express()
 
 let myAddress = "0xfbdaf3c38ca028e6c5ec40c7f92bcc06f6f38dbb";
