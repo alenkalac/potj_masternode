@@ -1,11 +1,15 @@
-var Web3 = require('web3');
-var express = require('express')
+let Web3 = require('web3');
+let express = require('express');
+let ejs = require('ejs');
 
 var app = express()
 
+app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/public'));
+
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', function (req, res) {
-  res.send('hello world')
+  res.render('index', {users: "210", shared: "15.25"});
 })
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
@@ -16,7 +20,7 @@ var contract = "0xC28E860C9132D55A184F9af53FC85e90Aa3A0153";
 
 web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws"));
 
-op = initContract(ab, contract);
+//op = initContract(ab, contract);
 
 function initContract(ab, contract) {
     //console.log(web3.eth.Contract);

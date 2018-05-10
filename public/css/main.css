@@ -1,0 +1,68 @@
+.bg-black {
+    background-color: black;
+}
+
+.container-fluid {
+    margin-top: 10px;
+}
+
+.header {
+    width: 100%;
+    height: 300px;
+    position: relative;
+    color: white;
+}
+
+#particles-js {
+    position: absolute;
+    height: 300px;
+    width: 100%;
+    background: black;
+}
+
+.card {
+    margin-bottom: 5px;
+}
+
+.intro {
+   padding-top: 70px;
+}
+
+.intro .card {
+    border: none;
+}
+
+.intro .tagline {
+    text-transform: uppercase;
+}
+
+.card-logo {
+    font-size: 6em;
+    color: black;
+}
+
+.footer {
+    height: 60px;
+    background: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#metamask-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: pink;
+    font-size: 2em;
+    color: black;
+    flex-direction: column;
+}
+
+#metamask-overlay img {
+    width: 45px;
+}
