@@ -9,9 +9,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdn.rawgit.com/tarkhov/postboot/v1.0.0-beta1/dist/css/postboot.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/loading.css"/>
+    <link rel="stylesheet" type="text/css" href="css/loading-btn.css"/>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    
+    <!-- JavaScript -->
+    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/alertify.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/css/alertify.min.css"/>
 
     <script src="js/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
@@ -95,7 +101,7 @@
                                 <div class="col-sm px-0">
                                     <div class="card-body">
                                         <h4 class="card-title">Proof Of Weak Hands <span class="badge badge-secondary">SOON</span></h4>
-                                        <p class="card-text">....</p>
+                                        <p class="card-text">Coming Soon</p>
                                         <button class="btn btn-3d-dark btn-block" disabled>BUY PoWH3D</button>
                                     
                                     </div>
@@ -107,12 +113,12 @@
                         <div class="card ">
                             <div class="row">
                                 <div class="col-sm col-sm-auto pr-0">
-                                    <img class="card-img-top-left" src="https://cdn.discordapp.com/attachments/443627457900314639/443787087498575902/CGN-GREEN_BORDER-ALPHA.png" height="100px"/>
+                                    <img class="card-img-top-left" src="img/CGN-GREEN_BORDER-ALPHA.png" height="100px"/>
                                 </div>
                                 <div class="col-sm px-0">
                                     <div class="card-body">
                                         <h4 class="card-title">Craig Grant Now <span class="badge badge-secondary">SOON</span></h4>
-                                        <p class="card-text">....</p>
+                                        <p class="card-text">Coming Soon</p>
                                         <button class="btn btn-3d-dark btn-block" disabled>BUY CGNow</button>
                                     </div>
                                 </div>
@@ -129,14 +135,16 @@
                         <div><img src="img/loader.gif"></div>
                     </div>
                     <div class="card-body">
+                        <div>Minimum Withdraw: <strong><%= minimum %> ETH</strong></div>
                         <h5 class="card-title">Your Balance: <span id="balance">0.000000</span> ETH</h5>
-                        <a href="#" class="btn btn-3d-dark">Request Withdraw</a>
+                        <div id="claim_btn" class="btn btn-3d-dark"><span>Request Withdraw</span><div class="ld ld-ring ld-spin hidden"></div></div>
                     </div>
                 </div>
 
+                <h4 class="">MasterNode Stats</h4>
                 <div class="card text-white bg-teal">
                     <div class="card-body">
-                        <h5 class="card-title">Master Node Stats</h5>
+                        
                         <p class="card-text">Users: <strong id="user_count">0</strong> <br>Shared: <strong id="share_total">0.000000 ETH</strong></p>
                     </div>
                 </div>
@@ -195,7 +203,7 @@
                         <div class="card-logo"><i class="fas fa-trophy"></i></div>
                         <h5 class="card-title">NOTHING TO LOSE, EVERYTHING TO GAIN</h5> <hr>
                         <p class="card-text">
-                            Think about it, Using us as your master node will give you all the benefits. Using anything else or no one at all will give you nothing back.
+                            Think about it, using us as your master node will give you all the benefits. Using anything else or no one at all will give you nothing back.
                             Let's work together and profit together, Fair and square.
                         </p>
                     </div>
@@ -229,7 +237,6 @@
         });
 
         $(document).ready(() => {
-
             updateSiteStats();
 
             if (typeof web3 !== 'undefined') {
@@ -265,6 +272,7 @@
                         $("#metamask-overlay").removeClass("d-flex");
                         $("#metamask-overlay").hide();
                         clearInterval(waitformetamaskunlock);
+                        updateUserStats(account);
                     }
                 }, 4*1000);
     
@@ -287,12 +295,35 @@
                 });
             }
 
+            function setLoaderOnButton() {
+                $("#claim_btn span")[0].innerHTML = "WITHDRAW PENDING";
+                $("#claim_btn").removeClass("btn-3d-dark");
+                $("#claim_btn").addClass("btn-3d-secondary ld-ext-right running");
+                $("#claim_btn .ld").removeClass("hidden");
+            }
+
             function updateUserStats(address) {
                 let data = $.getJSON("/info/"+address, (res) => {
                     console.log(res);
                     $("#balance")[0].innerHTML = Number(res.balance).toFixed(6);
+                    console.log(res.claim_pending);
+                    if(res.claim_pending > 0) {
+                        setLoaderOnButton();
+                    } 
                 });
             }
+
+            $("#claim_btn").on("click", () => {
+                $.getJSON("/withdraw/" + account, (res) => {
+                    console.log(res.success);
+                    if(res.success) {
+                        alertify.success('<strong>Congradulations!</strong><br>Your ETH is on its way.<br>Waiting approval', 6);
+                        setLoaderOnButton();
+                    } else {
+                        alertify.error('<strong>Withdraw Failed </strong><br>You need at least <%= minimum %> ETH to be able to withdraw', 6);
+                    }
+                })
+            });
         })
         
     </script>

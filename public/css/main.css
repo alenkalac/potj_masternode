@@ -87,6 +87,17 @@
     margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
 
+.hidden {
+    display: none;
+}
+
+.alertify-notifier.ajs-bottom.ajs-right{
+    color: white;
+    right: -20px;
+    text-align: center;
+    
+}
+
 iframe {
     width: 0;
     height: 0;
