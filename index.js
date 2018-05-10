@@ -31,7 +31,7 @@ db.connect((err) => {
     console.log("Database Connected");
     db.query("SELECT * FROM stats WHERE id = 1", (err, result, fields) => {
         let last_block =  result[0].last_block;
-        //op = initContract(ab, contract, last_block);
+        op = initContract(ab, contract, last_block);
     });
 });
 
