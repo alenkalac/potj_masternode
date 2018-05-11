@@ -134,9 +134,10 @@ function initContract(ab, contract, from_block) {
 
         //update_buysell_price(MyContract);
 
-        MyContract.events.onTokenPurchase({fromBlock: res-100}, (err, r) => {
-
+        MyContract.events.allEvents({fromBlock: res-100}, (err, r) => {
+            //console.log(err);
         }).on("data", (data) => {
+            if(data.event != "onTokenPurchase") return;
             let ref = data.returnValues.referredBy;
             let user = data.returnValues.customerAddress;
             let block = data.blockNumber;
