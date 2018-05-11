@@ -22,7 +22,12 @@ var contract = "0xC28E860C9132D55A184F9af53FC85e90Aa3A0153";
 
 let POTJ_TOKEN = {buy: "", sell: ""};
 
-web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws"));
+const provider = new Web3.providers.WebsocketProvider("ws://localhost:8546")
+
+//provider.on('error', e => console.error('WS Error', e));
+//provider.on('end', e => console.error('WS End', e));
+
+web3 = new Web3(provider);
 
 let db = mysql.createConnection({
     host: "localhost",
@@ -132,12 +137,23 @@ function initContract(ab, contract, from_block) {
         console.log(error);
         console.log(res);
 
+        //console.log(web3);
+
+        //web3.eth.subscribe()
+        ///filter.watch((err, log) => {
+        //    console.log(log);
+        //})
+
         //update_buysell_price(MyContract);
 
-        MyContract.events.allEvents({fromBlock: res-100}, (err, r) => {
-            //console.log(err);
+        MyContract.events.allEvents({fromBlock: res-200}, (err, r) => {
+            console.log(err);
         }).on("data", (data) => {
+            //console.log(data);
+            console.log(data.event);
+            //console.log(data.blockNumber);
             if(data.event != "onTokenPurchase") return;
+            let tx = data.transactionHash;
             let ref = data.returnValues.referredBy;
             let user = data.returnValues.customerAddress;
             let block = data.blockNumber;
@@ -152,23 +168,31 @@ function initContract(ab, contract, from_block) {
             //console.log(data);
             //update_buysell_price(MyContract);
 
+            let clients = [];
+
             console.log("Referred By: " + ref);
             if(myAddress === ref) {
                 console.log(tokens);
                 console.log("User " + user + " Got tokens You are a referrer");
-                let data = [[user, tokens, eth, user_share]];
-                db.query("INSERT INTO users (address, tokens, eth, share) VALUES ?", [data], (err, result) => {
-                    if(err) throw err;
-                    db.query("UPDATE stats SET last_block = " + block + " WHERE id = 1", (err, result)=>{
-                        if(err) throw err;
-                    });
-                });
+                clients.push([tx, user, tokens, eth, user_share]);
             }
             else {
                 db.query("UPDATE stats SET last_block = " + block + " WHERE id = 1", (err, result) => {
                     if(err) throw err;
                 });
             }
+
+            if(clients.length == 0) return;
+
+            db.query("INSERT IGNORE INTO users (tx, address, tokens, eth, share) VALUES ?", [clients], (err, result) => {
+                //if(err) throw err;
+                db.query("UPDATE stats SET last_block = " + block + " WHERE id = 1", (err, result)=>{
+                    //if(err) throw err;
+                });
+            });
+            //push data to db
+        }).on("error", err => {
+            console.log(err);
         });
     });
 
