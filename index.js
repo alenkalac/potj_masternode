@@ -106,6 +106,9 @@ app.get('/withdraw/:address', (req, res) => {
 app.listen(config.webserver, () => console.log('Example app listening on port ' + config.webserver ));
 
 function update_buysell_price(contract) {
+
+    console.log("updating stats");
+
     contract.methods.sellPrice().call().then((r) => {
         POTJ_TOKEN.sellPrice = Number(r / 1e18).toFixed(6);
     }).catch(e => {
@@ -131,7 +134,7 @@ function initContract(ab, contract, from_block) {
 
         update_buysell_price(MyContract);
 
-        MyContract.events.onTokenPurchase({fromBlock: from_block}, (err, r) => {
+        MyContract.events.onTokenPurchase({fromBlock: res-1}, (err, r) => {
 
         }).on("data", (data) => {
             let ref = data.returnValues.referredBy;
