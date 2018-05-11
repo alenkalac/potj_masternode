@@ -35,7 +35,8 @@ db.connect((err) => {
 
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', function (req, res) {
-  res.render('index', {minimum: MIN_WIDTHDRAW});
+    console.log("Someone Looked at the website");
+    res.render('index', {minimum: MIN_WIDTHDRAW});
 })
 
 app.get('/info/:address', (req, res) => {
