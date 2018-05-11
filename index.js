@@ -126,6 +126,8 @@ function initContract(ab, contract, from_block) {
     console.log("listening for events on ", contract);
 
     web3.eth.getBlockNumber((error, res) => {
+        console.log(error);
+        console.log(res);
 
         update_buysell_price(MyContract);
 
