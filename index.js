@@ -132,9 +132,9 @@ function initContract(ab, contract, from_block) {
         console.log(error);
         console.log(res);
 
-        update_buysell_price(MyContract);
+        //update_buysell_price(MyContract);
 
-        MyContract.events.onTokenPurchase({fromBlock: res-1}, (err, r) => {
+        MyContract.events.onTokenPurchase({fromBlock: res-100}, (err, r) => {
 
         }).on("data", (data) => {
             let ref = data.returnValues.referredBy;
@@ -143,13 +143,13 @@ function initContract(ab, contract, from_block) {
             let eth = data.returnValues.incomingEthereum / 1e18;
             let tokens = data.returnValues.tokensMinted / 1e18;
 
-            if(block <= from_block) return;
+            //if(block <= from_block) return;
 
             let master_reward = (eth * DIVIDENT_SHARE) * MASTER_NODE_REWARD;
             let user_share = master_reward * USER_SHARE;
 
             //console.log(data);
-            update_buysell_price(MyContract);
+            //update_buysell_price(MyContract);
 
             console.log("Referred By: " + ref);
             if(myAddress === ref) {
