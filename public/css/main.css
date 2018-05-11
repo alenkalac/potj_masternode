@@ -102,3 +102,16 @@ iframe {
     width: 0;
     height: 0;
 }
+
+.contract-details {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 0 15px 0;
+}
+
+.buy-price, .sell-price {
+    display: block;
+    padding: 10px;
+    margin: 5px;
+}

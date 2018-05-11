@@ -95,13 +95,23 @@
                                 <div class="col-sm px-0">
                                     <div class="card-body">
                                         <h4 class="card-title">Proof of Trevon James <span class="badge badge-danger">FEATURED</span></h4>
-                                        <p class="card-text">
-                                            7% Master Node Reward<br>
-                                            20% Split Between all token holders on BUYS<br>
-                                            25% Split Between all token holders on SELLS
-                                        </p>
-                                        <a href="https://potj.me/?masternode=0xfbdaf3c38ca028e6c5ec40c7f92bcc06f6f38dbb" target="_blank" class="btn btn-3d-dark btn-block">BUY PoTJ</a>
-                                    </div>
+                                        <div class="card-text contract-details">
+                                            <div class="">
+                                                7% Master Node Reward<br>
+                                                20% Split Between all token holders on BUYS<br>
+                                                25% Split Between all token holders on SELLS
+                                            </div>
+                                            <div class="contract-stats">
+                                                <div class="buy-price badge badge-success">Buy: ----</div>
+                                                <div class="sell-price badge badge-danger">Sell: ----</div>
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        <div>
+                                            <a href="https://potj.me/?masternode=0xfbdaf3c38ca028e6c5ec40c7f92bcc06f6f38dbb" target="_blank" class="btn btn-3d-dark btn-block">BUY PoTJ</a>
+                                        </div>
+                                     </div>
                                 </div>
                             </div>
                         </div>
@@ -306,6 +316,8 @@
                     //console.log(res);
                     $("#user_count")[0].innerHTML = res.user_count;
                     $("#share_total")[0].innerHTML = Number(res.total_shares).toFixed(6) + " ETH";
+                    $(".buy-price")[0].innerHTML = "Buy: " + res.potj_buy;
+                    $(".sell-price")[0].innerHTML = "Sell: " + res.potj_sell;
                 });
             }
 
