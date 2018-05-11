@@ -103,7 +103,21 @@ app.get('/withdraw/:address', (req, res) => {
     });
 })
 
-app.listen(config.webserver, () => console.log('Example app listening on port 3000!'))
+app.listen(config.webserver, () => console.log('Example app listening on port ' + config.webserver ));
+
+function update_buysell_price(contract) {
+    contract.methods.sellPrice().call().then((r) => {
+        POTJ_TOKEN.sellPrice = Number(r / 1e18).toFixed(6);
+    }).catch(e => {
+        console.log(e);
+    });
+
+    contract.methods.buyPrice().call().then((r) => {
+        POTJ_TOKEN.buyPrice = Number(r / 1e18).toFixed(6);
+    }).catch(e => {
+        console.log(e);
+    });
+}
 
 function initContract(ab, contract, from_block) {
     var MyContract = new web3.eth.Contract(ab, contract);
@@ -111,21 +125,11 @@ function initContract(ab, contract, from_block) {
 
     console.log("listening for events on ", contract);
 
-    function update_buysell_price() {
-        MyContract.methods.sellPrice().call().then((r) => {
-            POTJ_TOKEN.sellPrice = Number(r / 1e18).toFixed(6);
-        });
-    
-        MyContract.methods.buyPrice().call().then((r) => {
-            POTJ_TOKEN.buyPrice = Number(r / 1e18).toFixed(6);
-        });
-    }
-
     web3.eth.getBlockNumber((error, res) => {
 
-        update_buysell_price();
+        update_buysell_price(MyContract);
 
-        MyContract.events.onTokenPurchase({fromBlock: from_block+1}, (err, r) => {
+        MyContract.events.onTokenPurchase({fromBlock: from_block}, (err, r) => {
 
         }).on("data", (data) => {
             let ref = data.returnValues.referredBy;
@@ -134,10 +138,13 @@ function initContract(ab, contract, from_block) {
             let eth = data.returnValues.incomingEthereum / 1e18;
             let tokens = data.returnValues.tokensMinted / 1e18;
 
+            if(block <= from_block) return;
+
             let master_reward = (eth * DIVIDENT_SHARE) * MASTER_NODE_REWARD;
             let user_share = master_reward * USER_SHARE;
 
-            update_buysell_price();
+            //console.log(data);
+            update_buysell_price(MyContract);
 
             console.log("Referred By: " + ref);
             if(myAddress === ref) {
