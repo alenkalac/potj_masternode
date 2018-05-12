@@ -150,7 +150,7 @@ function initContract(ab, contract, from_block) {
 
         update_buysell_price(MyContract);
 
-        MyContract.events.allEvents({fromBlock: res-200}, (err, r) => {
+        MyContract.events.allEvents({fromBlock: from_block + 1}, (err, r) => {
             console.log(err);
         }).on("data", (data) => {
             //console.log(data);
