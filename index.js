@@ -14,6 +14,8 @@ let MASTER_NODE_REWARD = 0.35; //7% of 20% (7 / 20) = 0.35
 
 let MIN_WIDTHDRAW = 0.006;
 
+let next_buysell_update = Date.now();
+
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
@@ -24,8 +26,8 @@ let POTJ_TOKEN = {buy: "", sell: ""};
 
 const provider = new Web3.providers.WebsocketProvider("ws://localhost:8546")
 
-//provider.on('error', e => console.error('WS Error', e));
-//provider.on('end', e => console.error('WS End', e));
+provider.on('error', e => console.error('WS Error', e));
+provider.on('end', e => console.error('WS End', e));
 
 web3 = new Web3(provider);
 
@@ -112,6 +114,8 @@ app.listen(config.webserver, () => console.log('Example app listening on port ' 
 
 function update_buysell_price(contract) {
 
+    if(next_buysell_update > Date.now()) return;
+
     console.log("updating stats");
 
     contract.methods.sellPrice().call().then((r) => {
@@ -125,26 +129,26 @@ function update_buysell_price(contract) {
     }).catch(e => {
         console.log(e);
     });
+
+    next_buysell_update += 60 * 1000;
 }
 
 function initContract(ab, contract, from_block) {
     var MyContract = new web3.eth.Contract(ab, contract);
     var contractInstance = MyContract.events;
 
+    update_buysell_price(MyContract);
+
     console.log("listening for events on ", contract);
 
     web3.eth.getBlockNumber((error, res) => {
-        console.log(error);
+        if(err) {
+            console.log("ERROR" + err);
+            return;
+        }
         console.log(res);
 
-        //console.log(web3);
-
-        //web3.eth.subscribe()
-        ///filter.watch((err, log) => {
-        //    console.log(log);
-        //})
-
-        //update_buysell_price(MyContract);
+        update_buysell_price(MyContract);
 
         MyContract.events.allEvents({fromBlock: res-200}, (err, r) => {
             console.log(err);
