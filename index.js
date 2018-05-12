@@ -142,8 +142,8 @@ function initContract(ab, contract, from_block) {
     console.log("listening for events on ", contract);
 
     web3.eth.getBlockNumber((error, res) => {
-        if(err) {
-            console.log("ERROR" + err);
+        if(error) {
+            console.log("ERROR" + error);
             return;
         }
         console.log(res);
